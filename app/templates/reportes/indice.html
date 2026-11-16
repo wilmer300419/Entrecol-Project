@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% from '_macros.html' import icono %}
+{% block titulo %}Reportes{% endblock %}
+{% block contenido %}<h1>Reportes</h1><p class="muted">Elige un reporte, ajusta los parámetros y revisa la vista previa en PDF antes de imprimir.</p>
+<div class="rejilla">{% for r in menu_reportes %}<a class="tarjeta enlace-tarjeta" href="{{ url_for('reportes.ver', slug=r.slug) }}"><span class="icono-grande">{{ icono(r.icono) }}</span><strong>{{ r.titulo }}</strong><span class="muted">{{ r.descripcion }}</span></a>{% endfor %}</div>
+{% endblock %}

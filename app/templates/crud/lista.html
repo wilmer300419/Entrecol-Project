@@ -1,0 +1,38 @@
+{% extends 'base.html' %}{% from '_macros.html' import icono, paginacion %}
+{% block titulo %}{{ e.titulo }}{% endblock %}
+{% block contenido %}
+<div class="cabecera-pagina">
+  <div><h1>{{ e.titulo }}</h1><p class="muted">Consulta, busca y administra los registros de {{ e.titulo|lower }}.</p></div>
+  {% if usuario.puede_escribir %}<a class="btn btn-prim" href="{{ url_for('crud.nuevo', slug=e.slug) }}">{{ icono('plus') }} Nuevo {{ e.singular }}</a>{% endif %}
+</div>
+<form class="busqueda tarjeta" method="get" role="search">
+  <div class="campo"><label for="q">Buscar</label><input id="q" type="search" name="q" value="{{ q }}" placeholder="Texto en cualquier columna"></div>
+  <details {% if filtros %}open{% endif %}><summary>Filtros por columna (consulta dinámica)</summary>
+    <div class="filtros">{% for col, etiqueta in e.columnas %}<div class="campo"><label for="f_{{ col }}">{{ etiqueta }}</label><input id="f_{{ col }}" name="f_{{ col }}" value="{{ filtros.get(col, '') }}"></div>{% endfor %}</div>
+  </details>
+  <div class="campo campo-orden"><label for="orden">Ordenar por</label>
+    <select id="orden" name="orden">{% for col, etiqueta in e.columnas %}<option value="{{ col }}" {% if col == orden %}selected{% endif %}>{{ etiqueta }}</option>{% endfor %}</select></div>
+  <div class="campo campo-orden"><label for="dir">Sentido</label>
+    <select id="dir" name="dir"><option value="asc">Ascendente</option><option value="desc" {% if direccion == 'desc' %}selected{% endif %}>Descendente</option></select></div>
+  <div class="acciones"><button class="btn btn-prim" type="submit">{{ icono('search') }} Consultar</button>
+    <a class="btn btn-sec" href="{{ url_for('crud.listar', slug=e.slug) }}">Limpiar</a></div>
+</form>
+<div class="tarjeta">
+  <div class="tabla-wrap" tabindex="0" role="region" aria-label="Tabla de {{ e.titulo }}">
+  <table class="tabla">
+    <thead><tr>{% for col, etiqueta in e.columnas %}<th scope="col">{{ etiqueta }}</th>{% endfor %}<th scope="col" class="acc-col">Acciones</th></tr></thead>
+    <tbody>
+    {% for f in filas %}<tr>
+      {% for col, etiqueta in e.columnas %}<td>{% if col in ('salario','bonificacion','auxilio_transporte') %}{{ f[col]|moneda }}{% else %}{{ f[col]|celda }}{% endif %}</td>{% endfor %}
+      <td class="acc-col">
+        {% if usuario.puede_escribir %}<a class="btn-icono" href="{{ url_for('crud.editar', slug=e.slug, pk=f[e.pk]) }}" aria-label="Editar {{ e.singular }} {{ f[e.pk] }}">{{ icono('edit') }}</a>{% endif %}
+        {% if usuario.es_admin %}<form method="post" class="en-linea" action="{{ url_for('crud.eliminar', slug=e.slug, pk=f[e.pk]) }}" data-confirmar="¿Eliminar este registro? Esta acción no se puede deshacer.">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-icono peligro" type="submit" aria-label="Eliminar {{ e.singular }} {{ f[e.pk] }}">{{ icono('trash') }}</button></form>{% endif %}
+      </td></tr>
+    {% else %}<tr><td colspan="{{ e.columnas|length + 1 }}" class="vacio">No hay registros que coincidan con la consulta.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+  {% set args = {'slug': e.slug} %}{% for k, v in request.args.items() if k != 'pagina' %}{% set _ = args.update({k: v}) %}{% endfor %}
+  {{ paginacion(pagina, 'crud.listar', args) }}
+</div>
+{% endblock %}

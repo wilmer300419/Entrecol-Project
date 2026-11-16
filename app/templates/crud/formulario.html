@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% from '_macros.html' import campo %}
+{% block titulo %}{{ 'Editar' if editando else 'Nuevo' }} {{ e.singular }}{% endblock %}
+{% block contenido %}
+<h1>{{ 'Editar' if editando else 'Nuevo' }} {{ e.singular }}</h1>
+<form class="tarjeta formulario" method="post" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% if errores.get('_general') %}<div class="aviso aviso-error" role="alert">{{ errores['_general'] }}</div>{% endif %}
+  {% if errores %}<p class="error-resumen" role="alert">Revisa los campos marcados.</p>{% endif %}
+  <div class="cuadricula-form">{% for c in e.campos %}{{ campo(c, valores, errores, opciones, editando) }}{% endfor %}</div>
+  <div class="acciones"><button class="btn btn-prim" type="submit">Guardar</button><a class="btn btn-sec" href="{{ url_for('crud.listar', slug=e.slug) }}">Cancelar</a></div>
+</form>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block titulo %}{{ 'Editar' if editando else 'Nuevo' }} usuario{% endblock %}
+{% block contenido %}
+<h1>{{ 'Editar' if editando else 'Nuevo' }} usuario</h1>
+<form class="tarjeta formulario" method="post" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="cuadricula-form">
+    <div class="campo"><label for="nombre_usuario">Nombre de usuario</label>
+      <input id="nombre_usuario" name="nombre_usuario" value="{{ valores.get('nombre_usuario', '') }}" required {{ 'readonly' if editando }} autocapitalize="none" {% if errores.nombre_usuario %}aria-invalid="true"{% endif %}>
+      {% for m in errores.get('nombre_usuario', []) %}<small class="error-campo">{{ m }}</small>{% endfor %}</div>
+    <div class="campo"><label for="nombre_visible">Nombre para mostrar</label><input id="nombre_visible" name="nombre_visible" value="{{ valores.get('nombre_visible', '') }}" required maxlength="80">
+      {% for m in errores.get('nombre_visible', []) %}<small class="error-campo">{{ m }}</small>{% endfor %}</div>
+    <div class="campo"><label for="rol">Rol</label><select id="rol" name="rol">{% for r in roles %}<option value="{{ r.value }}" {{ 'selected' if valores.get('rol') == r.value }}>{{ r.value }}</option>{% endfor %}</select>
+      {% for m in errores.get('rol', []) %}<small class="error-campo">{{ m }}</small>{% endfor %}</div>
+    <div class="campo"><label for="password">{{ 'Nueva contraseña (opcional)' if editando else 'Contraseña' }}</label><input id="password" name="password" type="password" autocomplete="new-password" {{ 'required' if not editando }}>
+      <small class="ayuda">Mínimo 10 caracteres con mayúscula, minúscula, número y símbolo.</small>
+      {% for m in errores.get('password', []) %}<small class="error-campo">{{ m }}</small>{% endfor %}</div>
+    {% if editando %}<div class="campo"><label class="check"><input type="checkbox" name="activo" value="1" {{ 'checked' if valores.get('activo') }}> Cuenta activa</label></div>{% endif %}
+  </div>
+  <div class="acciones"><button class="btn btn-prim" type="submit">Guardar</button><a class="btn btn-sec" href="{{ url_for('admin.usuarios') }}">Cancelar</a></div>
+</form>
+{% endblock %}

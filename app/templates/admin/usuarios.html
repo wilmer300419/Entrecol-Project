@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% from '_macros.html' import icono %}
+{% block titulo %}Usuarios{% endblock %}
+{% block contenido %}
+<div class="cabecera-pagina"><div><h1>Usuarios</h1><p class="muted">Administra el acceso al sistema.</p></div><a class="btn btn-prim" href="{{ url_for('admin.usuario_nuevo') }}">{{ icono('plus') }} Nuevo usuario</a></div>
+<div class="tarjeta"><div class="tabla-wrap" tabindex="0" role="region" aria-label="Usuarios"><table class="tabla">
+<thead><tr><th scope="col">Usuario</th><th scope="col">Nombre</th><th scope="col">Rol</th><th scope="col">Estado</th><th scope="col">Último acceso</th><th scope="col" class="acc-col">Acciones</th></tr></thead>
+<tbody>{% for u in filas %}<tr><td>{{ u.nombre_usuario }}</td><td>{{ u.nombre_visible }}</td><td><span class="chip">{{ u.rol }}</span></td>
+<td>{{ 'Activo' if u.activo else 'Inactivo' }}</td><td>{{ u.ultimo_acceso|celda }}</td>
+<td class="acc-col"><a class="btn-icono" href="{{ url_for('admin.usuario_editar', id_usuario=u.id_usuario) }}" aria-label="Editar {{ u.nombre_usuario }}">{{ icono('edit') }}</a>
+<form method="post" class="en-linea" action="{{ url_for('admin.usuario_cerrar_sesiones', id_usuario=u.id_usuario) }}" data-confirmar="¿Cerrar todas las sesiones activas de {{ u.nombre_usuario }}?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-icono" type="submit" aria-label="Cerrar sesiones de {{ u.nombre_usuario }}">{{ icono('logout') }}</button></form></td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}

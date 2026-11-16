@@ -1,0 +1,50 @@
+{% from '_macros.html' import icono %}
+<!doctype html>
+<html lang="es" data-tema="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Inicio{% endblock %} · EntreCOL+</title>
+  <script src="{{ url_for('static', filename='js/tema-inicial.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="{{ 'con-nav' if usuario else 'sin-nav' }}">
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="barra">
+    {% if usuario %}<button class="btn-icono" id="btn-menu" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu">{{ icono('menu') }}</button>{% endif %}
+    <a class="marca" href="{{ url_for('main.inicio') }}"><span class="marca-logo" aria-hidden="true">E+</span> EntreCOL+</a>
+    <span class="espacio"></span>
+    <button class="btn-icono" id="btn-tema" type="button" aria-label="Cambiar a modo oscuro" title="Cambiar tema">
+      <span class="solo-claro">{{ icono('moon') }}</span><span class="solo-oscuro">{{ icono('sun') }}</span>
+    </button>
+    {% if usuario %}
+    <div class="usuario"><span class="usuario-nombre">{{ usuario.nombre_visible }}</span><span class="chip">{{ usuario.rol.value }}</span></div>
+    <form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-sec btn-peq" type="submit">{{ icono('logout') }}<span class="oculta-movil">Salir</span></button></form>
+    {% endif %}
+  </header>
+  {% if usuario %}
+  <nav class="menu" id="menu" aria-label="Menú principal">
+    <a href="{{ url_for('main.inicio') }}" {% if request.endpoint == 'main.inicio' %}aria-current="page"{% endif %}>{{ icono('inicio') }} Inicio</a>
+    <p class="menu-titulo">Reportes</p>
+    {% for r in menu_reportes %}<a href="{{ url_for('reportes.ver', slug=r.slug) }}" {% if request.view_args and request.view_args.get('slug') == r.slug and request.blueprint == 'reportes' %}aria-current="page"{% endif %}>{{ icono(r.icono) }} {{ r.titulo|replace('Reporte de ', '')|capitalize }}</a>{% endfor %}
+    {% for grupo, entidades in menu_datos.items() %}
+    <p class="menu-titulo">Datos · {{ grupo }}</p>
+    {% for e in entidades %}<a href="{{ url_for('crud.listar', slug=e.slug) }}" {% if request.view_args and request.view_args.get('slug') == e.slug and request.blueprint == 'crud' %}aria-current="page"{% endif %}>{{ icono('db') }} {{ e.titulo }}</a>{% endfor %}
+    {% endfor %}
+    {% if usuario.puede_escribir %}<p class="menu-titulo">Herramientas</p>
+    <a href="{{ url_for('cargas.indice') }}" {% if request.blueprint == 'cargas' %}aria-current="page"{% endif %}>{{ icono('upload') }} Cargar archivos</a>{% endif %}
+    {% if usuario.es_admin %}<p class="menu-titulo">Administración</p>
+    <a href="{{ url_for('admin.usuarios') }}">{{ icono('users') }} Usuarios</a>
+    <a href="{{ url_for('admin.auditoria') }}">{{ icono('shield') }} Auditoría</a>{% endif %}
+  </nav>
+  <div class="telon" id="telon" hidden></div>
+  {% endif %}
+  <main id="contenido" tabindex="-1">
+    <div aria-live="polite">{% for categoria, msg in get_flashed_messages(with_categories=true) %}<div class="aviso aviso-{{ categoria }}" role="status">{{ msg }}</div>{% endfor %}</div>
+    {% block contenido %}{% endblock %}
+  </main>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

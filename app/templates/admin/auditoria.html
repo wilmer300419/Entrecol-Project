@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% from '_macros.html' import paginacion %}
+{% block titulo %}Auditoría{% endblock %}
+{% block contenido %}
+<h1>Auditoría de usuarios</h1><p class="muted">Registro de accesos, cambios de datos, cargas y reportes generados.</p>
+<form class="busqueda tarjeta" method="get">
+  <div class="campo"><label for="usuario">Usuario</label><input id="usuario" name="usuario" value="{{ usuario_filtro }}"></div>
+  <div class="campo"><label for="accion">Acción</label><select id="accion" name="accion"><option value="">Todas</option>{% for a in acciones %}<option {{ 'selected' if a == accion }}>{{ a }}</option>{% endfor %}</select></div>
+  <div class="acciones"><button class="btn btn-prim" type="submit">Filtrar</button></div>
+</form>
+<div class="tarjeta"><div class="tabla-wrap" tabindex="0" role="region" aria-label="Auditoría"><table class="tabla">
+<thead><tr><th scope="col">Fecha</th><th scope="col">Usuario</th><th scope="col">Acción</th><th scope="col">Entidad</th><th scope="col">Detalle</th><th scope="col">IP</th></tr></thead>
+<tbody>{% for f in filas %}<tr><td>{{ f.fecha|celda }}</td><td>{{ f.nombre_usuario or '—' }}</td><td><span class="chip">{{ f.accion }}</span></td><td>{{ f.entidad or '' }}</td><td>{{ f.detalle or '' }}</td><td>{{ f.ip or '' }}</td></tr>
+{% else %}<tr><td colspan="6" class="vacio">Sin registros.</td></tr>{% endfor %}</tbody></table></div>
+{% set args = {} %}{% for k, v in request.args.items() if k != 'pagina' %}{% set _ = args.update({k: v}) %}{% endfor %}
+{{ paginacion(pagina, 'admin.auditoria', args) }}</div>
+{% endblock %}

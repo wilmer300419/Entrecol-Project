@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% from '_macros.html' import icono %}
+{% block contenido %}
+<h1>Hola, {{ usuario.nombre_visible }}</h1>
+<p class="muted">Resumen de la información cargada en el sistema.</p>
+<div class="rejilla">
+  {% for titulo, n, slug in tarjetas %}
+  <a class="tarjeta metrica" href="{{ url_for('crud.listar', slug=slug) }}"><span class="metrica-num">{{ '{:,}'.format(n).replace(',', '.') }}</span><span>{{ titulo }}</span></a>
+  {% endfor %}
+</div>
+<h2>Reportes</h2>
+<div class="rejilla">
+  {% for r in menu_reportes %}
+  <a class="tarjeta enlace-tarjeta" href="{{ url_for('reportes.ver', slug=r.slug) }}"><span class="icono-grande">{{ icono(r.icono) }}</span><strong>{{ r.titulo }}</strong><span class="muted">{{ r.descripcion }}</span></a>
+  {% endfor %}
+</div>
+{% endblock %}

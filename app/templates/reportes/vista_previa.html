@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% from '_macros.html' import icono %}
+{% block titulo %}Vista previa · {{ r.titulo }}{% endblock %}
+{% block contenido %}
+<div class="cabecera-pagina"><div><h1>Vista previa en PDF</h1><p class="muted">{{ r.titulo }}. Revisa el documento y decide si deseas imprimirlo.</p></div>
+  <div class="acciones"><button class="btn btn-prim" type="button" id="btn-imprimir">{{ icono('print') }} Imprimir</button>
+    <a class="btn btn-sec" href="{{ url_descarga }}">{{ icono('download') }} Descargar</a>
+    <a class="btn btn-sec" href="{{ url_for('reportes.ver', slug=r.slug, ejecutar=1, **consulta) }}">← Volver al reporte</a></div></div>
+<div class="tarjeta visor"><iframe id="visor-pdf" title="Vista previa del reporte en PDF" src="{{ url_pdf }}"></iframe>
+<p class="muted">Si tu navegador no muestra el PDF, usa «Descargar».</p></div>
+{% endblock %}

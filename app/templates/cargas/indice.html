@@ -1,0 +1,22 @@
+{% extends 'base.html' %}{% from '_macros.html' import icono %}
+{% block titulo %}Cargar archivos{% endblock %}
+{% block contenido %}
+<h1>Cargar archivos</h1><p class="muted">Sube archivos con la misma estructura entregada por el cliente. La carga es idempotente: si el registro ya existe se actualiza.</p>
+{% if error %}<div class="aviso aviso-error" role="alert">{{ error }}</div>{% endif %}
+{% if resultado %}<section class="tarjeta" aria-live="polite"><h2>Resultado de la carga: {{ resultado.origen }}</h2>
+  <p><strong>{{ resultado.insertados }}</strong> nuevos · <strong>{{ resultado.actualizados }}</strong> actualizados · <strong>{{ resultado.rechazados }}</strong> rechazados</p>
+  {% if resultado.detalle %}<ul>{% for k, v in resultado.detalle.items() %}<li>{{ k }}: {{ v }}</li>{% endfor %}</ul>{% endif %}
+  {% if resultado.advertencias %}<h3>Advertencias</h3><ul>{% for a in resultado.advertencias %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}</section>{% endif %}
+<div class="rejilla">
+{% for c in cargadores %}
+<form class="tarjeta formulario" method="post" action="{{ url_for('cargas.subir', clave=c.clave) }}" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h2>{{ c.titulo }}</h2>
+  <div class="campo"><label for="a_{{ c.clave }}">Archivo ({{ c.extensiones|join(', ') }})</label><input id="a_{{ c.clave }}" type="file" name="archivo" accept="{{ c.extensiones|join(',') }}" required></div>
+  {% if c.clave == 'nomina' %}<div class="cuadricula-form"><div class="campo"><label for="anio">Año de la liquidación</label><input id="anio" name="anio" type="number" min="2000" max="2100" placeholder="Automático"></div>
+  <div class="campo"><label for="mes">Mes</label><input id="mes" name="mes" type="number" min="1" max="12" placeholder="Automático"></div></div>
+  <small class="ayuda">Si lo dejas vacío se usa el mes de la novedad más reciente del archivo.</small>{% endif %}
+  <div class="acciones"><button class="btn btn-prim" type="submit">{{ icono('upload') }} Cargar</button></div>
+</form>{% endfor %}
+</div>
+{% endblock %}

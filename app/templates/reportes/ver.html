@@ -1,0 +1,25 @@
+{% extends 'base.html' %}{% from '_macros.html' import icono, bloque %}
+{% block titulo %}{{ r.titulo }}{% endblock %}
+{% block contenido %}
+<div class="cabecera-pagina"><div><h1>{{ r.titulo }}</h1><p class="muted">{{ r.descripcion }}</p></div></div>
+<form class="tarjeta formulario" method="get">
+  <input type="hidden" name="ejecutar" value="1">
+  <div class="cuadricula-form">
+  {% for p in parametros %}
+    <div class="campo"><label for="p_{{ p.nombre }}">{{ p.etiqueta }}</label>
+      {% if p.tipo == 'select' %}<select id="p_{{ p.nombre }}" name="{{ p.nombre }}">{% for v, et in p.opciones %}<option value="{{ v }}" {% if formulario[p.nombre]|string == v %}selected{% endif %}>{{ et }}</option>{% endfor %}</select>
+      {% else %}<input id="p_{{ p.nombre }}" name="{{ p.nombre }}" value="{{ formulario[p.nombre] }}" {% if p.tipo == 'entero' %}type="number" step="1"{% if p.minimo is not none %} min="{{ p.minimo }}"{% endif %}{% if p.maximo is not none %} max="{{ p.maximo }}"{% endif %}{% else %}type="text"{% endif %}{% if p.tipo == 'mesanio' %} placeholder="MM/AAAA" pattern="\d{1,2}/\d{4}"{% endif %} {% if errores.get(p.nombre) %}aria-invalid="true" aria-describedby="e_{{ p.nombre }}"{% endif %}>{% endif %}
+      {% if p.ayuda %}<small class="ayuda">{{ p.ayuda }}</small>{% endif %}
+      {% if errores.get(p.nombre) %}<small class="error-campo" id="e_{{ p.nombre }}">{{ errores[p.nombre] }}</small>{% endif %}</div>
+  {% endfor %}</div>
+  <div class="acciones"><button class="btn btn-prim" type="submit">{{ icono('chart') }} Generar reporte</button>
+  {% if informe %}<a class="btn btn-sec" href="{{ url_for('reportes.vista_previa', slug=r.slug, **consulta) }}">{{ icono('print') }} Vista previa en PDF</a>
+  <a class="btn btn-sec" href="{{ url_for('reportes.pdf', slug=r.slug, descargar=1, **consulta) }}">{{ icono('download') }} Descargar PDF</a>{% endif %}</div>
+</form>
+{% if informe %}
+<section aria-label="Resultado"><h2>{{ informe.titulo }}</h2>{% if informe.subtitulo %}<p class="muted">{{ informe.subtitulo }}</p>{% endif %}
+<ul class="parametros">{% for k, v in informe.parametros %}<li><strong>{{ k }}:</strong> {{ v }}</li>{% endfor %}</ul>
+{% for b in informe.bloques %}{{ bloque(b, filas_html_max) }}{% endfor %}</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if informe %}<script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script><script src="{{ url_for('static', filename='js/graficos.js') }}"></script>{% endif %}{% endblock %}
